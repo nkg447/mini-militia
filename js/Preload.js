@@ -1,7 +1,7 @@
 /**
  * Created by Asim on 4/20/2017.
  */
-function Preload(){
+function Preload(player) {
 
     var _this;
     this._init = function () {
@@ -40,29 +40,39 @@ function Preload(){
         this.resources.addAudio('gun_shot', 'audio/gun_shot.mp3');
 
         this.preloadInterval = setInterval(function () {
-            if(_this.resources.imageLoadedCount == Object.size(_this.resources.images)) {
+            if (_this.resources.imageLoadedCount == Object.size(_this.resources.images)) {
                 _this.splashAudio.pause();
                 delete _this.splashAudio;
                 clearInterval(_this.preloadInterval);
-                new Game(_this.canvas, _this.resources);
-            }else{
+                new Game(_this.canvas, _this.resources, player);
+            } else {
                 // console.log('here');
             }
-        }, 5000);
+        }, 2000);
     }
 
     this._init();
 }
 
-Object.size = function(obj) {
+Object.size = function (obj) {
     var size = 0, key;
     for (key in obj) {
         if (obj.hasOwnProperty(key)) size++;
     }
     return size;
 };
-
+var socket = io();
 window.onload = function () {
-
-    new Preload();
+    socket.emit("ready", true);
+    var player = -1;
+    socket.on("player", (p) => {
+        if (player == -1)
+            player = p;
+    });
+    socket.on('start', (msg) => {
+        if (msg == true) {
+            console.log("starting");
+            new Preload(player);
+        }
+    });
 }
