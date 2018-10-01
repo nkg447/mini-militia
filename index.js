@@ -43,6 +43,14 @@ io.on('connection', function (socket) {
         socket.broadcast.emit('enemymousemove', mousePos);
     });
 
+    socket.on('enemyfire', (fire_data) => {
+        socket.broadcast.emit('enemyfire', fire_data);
+    });
+
+    socket.on('myhealth', (health) => {
+        socket.broadcast.emit('myhealth', health);
+    });
+
 });
 
 server.listen(3000, function () {

@@ -2,7 +2,7 @@
  * Created by Asim on 4/6/2017.
  */
 
-function Actor(ctx, startPosition, canvas, camera, collisionHandler, resources) {
+function Actor(ctx, startPosition, canvas, camera, collisionHandler, resources, actorType) {
     var _this = this;
 
     this._init = function() {
@@ -41,7 +41,7 @@ function Actor(ctx, startPosition, canvas, camera, collisionHandler, resources) 
         this.score = 0;
         this.kills = 0;
 
-        this.weapon = new Weapon(this.ctx, this.collisionHandler, 'shyame', this.resources);
+        this.weapon = new Weapon(this.ctx, this.collisionHandler, actorType, this.resources);
 
         this.characterHead = new Image();
         this.noOfLifesImage = new Image();

@@ -1,4 +1,4 @@
-function Game(canvas, resources,  player) {
+function Game(canvas, resources, player) {
     var _this;
     this._init = function () {
         _this = this;
@@ -14,14 +14,14 @@ function Game(canvas, resources,  player) {
         this.gameBullets = [];
 
         if (player == 1) {
-            this.shyame = new Shyame(this.ctx, { x: 600, y: 200 }, this.canvas, this.camera, this.collisionHandler, this.resources);
+            this.shyame = new Shyame(this.ctx, { x: 600, y: 200 }, this.canvas, this.camera, this.collisionHandler, this.resources, "shyame");
 
-            this.enemy = new Shyame(this.ctx, { x: 800, y: 200 }, this.canvas, this.camera, this.collisionHandler, this.resources);
+            this.enemy = new Shyame(this.ctx, { x: 800, y: 200 }, this.canvas, this.camera, this.collisionHandler, this.resources, "enemy");
         }
         else {
-            this.enemy = new Shyame(this.ctx, { x: 600, y: 200 }, this.canvas, this.camera, this.collisionHandler, this.resources);
+            this.enemy = new Shyame(this.ctx, { x: 600, y: 200 }, this.canvas, this.camera, this.collisionHandler, this.resources, "enemy");
 
-            this.shyame = new Shyame(this.ctx, { x: 800, y: 200 }, this.canvas, this.camera, this.collisionHandler, this.resources);
+            this.shyame = new Shyame(this.ctx, { x: 800, y: 200 }, this.canvas, this.camera, this.collisionHandler, this.resources, "shyame");
         }
         // console.log(player);
         // this.shyame = (player == 1) ? this.player1 : this.player2;
@@ -37,9 +37,20 @@ function Game(canvas, resources,  player) {
         socket.on('enemymove', (command) => {
             this.enemy.actor.commands = command;
         });
-        socket.on('enemymousemove', (mousePos)=>{
+        socket.on('enemymousemove', (mousePos) => {
             this.enemy.actor.mousePos = mousePos;
             this.enemy.actor._updateFaceSide();
+        });
+        socket.on('enemyfire', (fire_data) => {
+            this.gameBullets[Object.size(this.gameBullets)] = this.enemy.actor.weapon.fireBullet(fire_data.position, fire_data.mousePos);
+        });
+        socket.on('myhealth', (health) => {
+            this.shyame.actor.health = health;
+        });
+        socket.on('medead', (isDead) => {
+            if (isDead) {
+                this.respawn();
+            }
         })
 
         this.gameAnimationFrame = requestAnimationFrame(this.drawGame);
@@ -111,8 +122,9 @@ function Game(canvas, resources,  player) {
 
                     _this.gameBullets[i].hit = true;
                     _this.enemy.actor.health -= 50;
+                    socket.emit("myhealth", _this.enemy.actor.health);
                     if (_this.enemy.actor.health <= 0) {
-                        enemyDead();
+                        socket.emit('medead', true);
                     }
                 }
 
@@ -255,6 +267,12 @@ function Game(canvas, resources,  player) {
 
         _this.resources.getAudio('gun_shot').currentTime = 0;
         _this.gameBullets[Object.size(_this.gameBullets)] = _this.shyame.actor.weapon.fireBullet(_this.shyame.actor.position, _this.getMousePos(_this.canvas, e));
+
+        socket.emit("enemyfire", {
+            position: _this.shyame.actor.position,
+            mousePos: _this.getMousePos(_this.canvas, e)
+        });
+
         _this.resources.getAudio('gun_shot').play();
     };
 
