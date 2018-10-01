@@ -35,10 +35,12 @@ io.on('connection', function (socket) {
         }
     });
 
-
     socket.on('enemymove', (command) => {
-        //console.log(socket.is);
         socket.broadcast.emit('enemymove', command);
+    });
+
+    socket.on('enemymousemove', (mousePos) => {
+        socket.broadcast.emit('enemymousemove', mousePos);
     });
 
 });

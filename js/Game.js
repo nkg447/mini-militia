@@ -35,8 +35,11 @@ function Game(canvas, resources,  player) {
         this.addControls();
 
         socket.on('enemymove', (command) => {
-            console.log("cmd");
             this.enemy.actor.commands = command;
+        });
+        socket.on('enemymousemove', (mousePos)=>{
+            this.enemy.actor.mousePos = mousePos;
+            this.enemy.actor._updateFaceSide();
         })
 
         this.gameAnimationFrame = requestAnimationFrame(this.drawGame);
@@ -245,6 +248,7 @@ function Game(canvas, resources,  player) {
 
         _this.shyame.actor.mousePos = _this.getMousePos(_this.canvas, e);
         _this.shyame.actor._updateFaceSide();
+        socket.emit('enemymousemove', _this.shyame.actor.mousePos);
     };
 
     this.fireBulletEvent = function (e) {
